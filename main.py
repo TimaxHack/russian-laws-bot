@@ -194,6 +194,8 @@ async def handle_text(message: Message) -> Any:
 
             local_prompt += "\nОБЯЗАТЕЛЬНО в дополнение к ответу указывай список пунктов, частей, статей, которые применимы к вопросу/запросу (например: п.«В» ч.2 ст.158, п.«А» ч.3 ст.158), используй только подходящие статьи из списка актуальных статей. НИКОГДА не пиши в ответе, что были предоставлены лишние или не связанные с запросом пользователя статьи из законов, используй только те статьи законов которые подходят под запрос пользователя. Отвечать нужно только на запрос пользователя, справочная информация предоставлена только для тебя. Статьи законов найдены при помощи полнотекстового и векторного поиска, ИСПОЛЬЗУЙ подходящие статьи, ИСКЛЮЧИ лишние статьи, НЕ УПОМИНАЙ что в этом списке есть лишние статьи."
 
+            local_prompt += "В конце ответа задай список уточняющих вопросов, чтобы дать более точный ответ. Если тебе "
+
             tokens_count = len(encoding.encode(local_prompt))
 
             if tokens_count > MAX_PROMPT_TOKENS:
@@ -270,7 +272,6 @@ async def handle_document(message: Message) -> Any:
 dp = Dispatcher()
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
-
 if not TOKEN:
     raise ValueError('No TELEGRAM_TOKEN is provided in .env file.')
 
@@ -296,6 +297,12 @@ except RequestError as e:
         raise e
 
 bot = Bot(TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
+
+async def delete_webhook():
+    bot = Bot(TOKEN, parse_mode=ParseMode.MARKDOWN_V2)
+    await bot.delete_webhook()
+
+asyncio.run(delete_webhook())
 
 async def main() -> None:
     dp.include_router(router)
